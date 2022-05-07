@@ -1,0 +1,251 @@
+<html>
+<head>
+<title>Player.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #629755; font-style: italic;}
+.s3 { color: #629755; font-weight: bold; font-style: italic;}
+.s4 { color: #6897bb;}
+.s5 { color: #6a8759;}
+.s6 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Player.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">game</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">city.cs.engine.*</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">city.cs.engine.Shape</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">org.jbox2d.common.Vec2</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.lang.Math</span><span class="s0">;</span>
+
+<span class="s2">/**</span>
+ <span class="s2">* A player object.</span>
+ <span class="s2">*</span>
+ <span class="s2">* A player object contains the parameters and functionality of the player, the user controls</span>
+ <span class="s2">*</span>
+ <span class="s2">* </span><span class="s3">@author </span><span class="s2">adnanhabib</span>
+ <span class="s2">* </span><span class="s3">@version </span><span class="s2">1.0.0 May 7th, 2022</span>
+ <span class="s2">*/</span>
+
+<span class="s0">public class </span><span class="s1">Player </span><span class="s0">extends </span><span class="s1">Walker{</span>
+    <span class="s0">private static final </span><span class="s1">Shape bodyShape = </span><span class="s0">new </span><span class="s1">CircleShape(</span><span class="s4">1f</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private static final </span><span class="s1">BodyImage idlegif = </span><span class="s0">new </span><span class="s1">BodyImage(</span><span class="s5">&quot;data/idle.gif&quot;</span><span class="s0">, </span><span class="s4">5</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private static final </span><span class="s1">BodyImage walkgif = </span><span class="s0">new </span><span class="s1">BodyImage(</span><span class="s5">&quot;data/walk.gif&quot;</span><span class="s0">, </span><span class="s4">5</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private static final </span><span class="s1">BodyImage rungif = </span><span class="s0">new </span><span class="s1">BodyImage(</span><span class="s5">&quot;data/run.gif&quot;</span><span class="s0">, </span><span class="s4">5</span><span class="s1">)</span><span class="s0">;</span>
+
+
+    <span class="s0">private int </span><span class="s1">speed = </span><span class="s4">3</span><span class="s0">;</span>
+    <span class="s0">private boolean </span><span class="s1">walk</span><span class="s0">;</span>
+    <span class="s0">private boolean </span><span class="s1">run</span><span class="s0">;</span>
+    <span class="s0">private boolean </span><span class="s1">idle</span><span class="s0">;</span>
+    <span class="s1">AttachedImage img</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">health = </span><span class="s4">10</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">ammo</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">mag = </span><span class="s4">30</span><span class="s0">;</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Default player constructor</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">world -  the gameworld the player is in.</span>
+     <span class="s2">*/</span>
+    <span class="s0">public </span><span class="s1">Player(World world) {</span>
+        <span class="s0">super</span><span class="s1">(world</span><span class="s0">, </span><span class="s1">bodyShape)</span><span class="s0">;</span>
+        <span class="s6">//add image to player</span>
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">idlegif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,new </span><span class="s1">Vec2((</span><span class="s0">float</span><span class="s1">)-</span><span class="s4">0.25</span><span class="s0">,</span><span class="s1">(</span><span class="s0">float</span><span class="s1">)</span><span class="s4">1</span><span class="s1">))</span><span class="s0">;</span>
+
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the speed of the player</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">speed</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getSpeed(){</span>
+        <span class="s0">return </span><span class="s1">speed</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">*Calculate the angle between the player and a position</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">v the position we want to calculate the angle from the player to</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">getAngle(Vec2 v){</span>
+        <span class="s1">Vec2 p = </span><span class="s0">this</span><span class="s1">.getPosition()</span><span class="s0">; </span><span class="s6">//get position of player</span>
+        <span class="s1">Vec2 con = </span><span class="s0">new </span><span class="s1">Vec2(p.x</span><span class="s0">, </span><span class="s1">p.y+</span><span class="s4">5</span><span class="s1">)</span><span class="s0">; </span><span class="s6">//control vector</span>
+        <span class="s1">Vec2 m = v</span><span class="s0">; </span><span class="s6">//mouse vector</span>
+
+        <span class="s0">float </span><span class="s1">a  = getDistance(m</span><span class="s0">,</span><span class="s1">p)</span><span class="s0">; </span><span class="s6">//distance between mouse and player</span>
+        <span class="s0">float </span><span class="s1">b = getDistance(p</span><span class="s0">,</span><span class="s1">con)</span><span class="s0">; </span><span class="s6">//distance between player and control</span>
+        <span class="s0">float </span><span class="s1">c = getDistance(m</span><span class="s0">,</span><span class="s1">con)</span><span class="s0">; </span><span class="s6">//distance between mouse and top of the screen</span>
+        <span class="s0">double </span><span class="s1">x = (a*a + b*b - c*c)</span><span class="s0">; </span><span class="s6">//numerator of cosine rule</span>
+        <span class="s0">double </span><span class="s1">y = (</span><span class="s4">2.0 </span><span class="s1">* a * b)</span><span class="s0">; </span><span class="s6">//denominator of cosine rule</span>
+        <span class="s0">double </span><span class="s1">d = x/y</span><span class="s0">; </span><span class="s6">//cosine rule</span>
+        <span class="s0">double </span><span class="s1">A = Math.toDegrees(Math.acos(d))</span><span class="s0">; </span><span class="s6">//convert angle from radians to degrees</span>
+        <span class="s6">//if position of mouse is to the left of the player, flip the angle</span>
+        <span class="s0">if </span><span class="s1">(m.x-p.x &gt; </span><span class="s4">0</span><span class="s1">){</span>
+            <span class="s1">A = -A</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s6">//if A returns a float rotate player by the number</span>
+        <span class="s0">if </span><span class="s1">(!Float.isNaN((</span><span class="s0">float</span><span class="s1">) A)){</span>
+            <span class="s0">this</span><span class="s1">.rotateDegrees(</span><span class="s0">this</span><span class="s1">.getAngleDegrees()*-</span><span class="s4">1</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s0">this</span><span class="s1">.rotateDegrees((</span><span class="s0">float</span><span class="s1">) A)</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the distance between 2 vector positions</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">x first vector position</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">y second vector position</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the distance as a float</span>
+     <span class="s2">*/</span>
+    <span class="s0">private float </span><span class="s1">getDistance(Vec2 x</span><span class="s0">, </span><span class="s1">Vec2 y){</span>
+        <span class="s1">var a = x.x - y.x</span><span class="s0">; </span><span class="s6">//get distance between 2 x axis</span>
+        <span class="s1">var b = x.y - y.y</span><span class="s0">; </span><span class="s6">//get distance between 2 y axis</span>
+        <span class="s0">float </span><span class="s1">c  = (</span><span class="s0">float</span><span class="s1">) Math.sqrt( a*a + b*b )</span><span class="s0">;</span>
+        <span class="s0">return </span><span class="s1">c</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* change the animation to walk animation</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">walk(){</span>
+        <span class="s0">this</span><span class="s1">.removeAllImages()</span><span class="s0">; </span><span class="s6">//remove current animation</span>
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">walkgif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,new </span><span class="s1">Vec2((</span><span class="s0">float</span><span class="s1">)-</span><span class="s4">0.25</span><span class="s0">,</span><span class="s1">(</span><span class="s0">float</span><span class="s1">)</span><span class="s4">1</span><span class="s1">))</span><span class="s0">; </span><span class="s6">//add new animation</span>
+        <span class="s1">walk = </span><span class="s0">true;</span>
+        <span class="s1">idle = </span><span class="s0">false;</span>
+        <span class="s1">run = </span><span class="s0">false;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method that changes the animation to the run animation</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">run(){</span>
+        <span class="s6">//removes all animations and adds run animation</span>
+        <span class="s0">this</span><span class="s1">.removeAllImages()</span><span class="s0">;</span>
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">rungif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,new </span><span class="s1">Vec2((</span><span class="s0">float</span><span class="s1">)-</span><span class="s4">0.25</span><span class="s0">,</span><span class="s1">(</span><span class="s0">float</span><span class="s1">)</span><span class="s4">1</span><span class="s1">))</span><span class="s0">;</span>
+        <span class="s1">run = </span><span class="s0">true;</span>
+        <span class="s1">walk = </span><span class="s0">false;</span>
+        <span class="s1">idle = </span><span class="s0">false;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method that changes the animation to the run animation</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">idle(){</span>
+        <span class="s6">//removes all animations and adds idle animation</span>
+        <span class="s0">this</span><span class="s1">.removeAllImages()</span><span class="s0">;</span>
+
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">idlegif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,new </span><span class="s1">Vec2((</span><span class="s0">float</span><span class="s1">)-</span><span class="s4">0.25</span><span class="s0">,</span><span class="s1">(</span><span class="s0">float</span><span class="s1">)</span><span class="s4">1</span><span class="s1">))</span><span class="s0">;</span>
+        <span class="s1">idle = </span><span class="s0">true;</span>
+        <span class="s1">walk = </span><span class="s0">false;</span>
+        <span class="s1">run = </span><span class="s0">false;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method to check if the player is running</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">true if the player is running</span>
+     <span class="s2">*/</span>
+    <span class="s0">public boolean </span><span class="s1">isRun(){</span>
+        <span class="s0">return </span><span class="s1">run</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method which shoots a bullet</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">shoot(){</span>
+        <span class="s6">//if mag is greater than 0, shoot a projectile, reduce mag by 1</span>
+        <span class="s0">if </span><span class="s1">(</span><span class="s0">this</span><span class="s1">.mag &gt; </span><span class="s4">0</span><span class="s1">){</span>
+            <span class="s1">Bullet bullet = </span><span class="s0">new </span><span class="s1">Bullet(</span><span class="s0">this</span><span class="s1">.getWorld()</span><span class="s0">, this</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s1">bullet.shoot()</span><span class="s0">;</span>
+            <span class="s0">this</span><span class="s1">.mag --</span><span class="s0">;</span>
+        <span class="s1">}</span>
+
+    <span class="s1">}</span>
+
+
+    <span class="s2">/**</span>
+     <span class="s2">* method which gets position of the barrel of the gun, so the bullet can be shot from the correct distance</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">centre the position of the player</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">r the radius where we want the tracker to be from the centre</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">angle the angle of the tracker from the centre</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">g if the method is used for the gun, this should be set to 0</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the position of the tracker</span>
+     <span class="s2">*/</span>
+    <span class="s0">public </span><span class="s1">Vec2 getTrackerPos(Vec2 centre</span><span class="s0">, float </span><span class="s1">r</span><span class="s0">, double </span><span class="s1">angle</span><span class="s0">, boolean </span><span class="s1">g){</span>
+        <span class="s6">//make angle positive and &lt;= 180</span>
+        <span class="s0">if </span><span class="s1">(angle &lt; </span><span class="s4">0</span><span class="s1">){</span>
+            <span class="s1">angle = angle*-</span><span class="s4">1</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s0">else if</span><span class="s1">(angle == </span><span class="s4">180</span><span class="s1">){</span>
+        <span class="s1">}</span>
+        <span class="s0">else</span><span class="s1">{</span>
+            <span class="s1">angle = </span><span class="s4">360 </span><span class="s1">- angle</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s1">angle = angle * (Math.PI/</span><span class="s4">180</span><span class="s1">)</span><span class="s0">; </span><span class="s6">//convert angle to radians</span>
+        <span class="s0">if</span><span class="s1">(g){</span>
+            <span class="s1">angle+=</span><span class="s4">0.2</span><span class="s0">; </span><span class="s6">//increment angle to account for the gun which isn't exactly in place</span>
+        <span class="s1">}</span>
+        <span class="s6">//calculate the x and y axis of the tracker</span>
+        <span class="s0">float </span><span class="s1">x = (</span><span class="s0">float</span><span class="s1">) (centre.x + (r * Math.sin(angle)))</span><span class="s0">;</span>
+        <span class="s0">float </span><span class="s1">y = (</span><span class="s0">float</span><span class="s1">) (centre.y + (r * Math.cos(angle)))</span><span class="s0">;</span>
+        <span class="s0">return new </span><span class="s1">Vec2(x</span><span class="s0">,</span><span class="s1">y)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Reduce the health of the player.</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">damage the amount we decrement the health by.</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">reduceHealth(</span><span class="s0">int </span><span class="s1">damage){</span>
+        <span class="s1">health = health - damage</span><span class="s0">; </span><span class="s6">//decrement health by damage</span>
+        <span class="s0">if </span><span class="s1">(health &lt;= </span><span class="s4">0</span><span class="s1">){</span>
+            <span class="s0">this</span><span class="s1">.destroy()</span><span class="s0">; </span><span class="s6">//if health is less than 0 destroy player</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Get the health of the player</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">health</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getHealth(){</span>
+        <span class="s0">return </span><span class="s1">health</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Gets the ammo of the player</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">how many bullets are left</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getAmmo(){</span>
+        <span class="s0">return </span><span class="s1">mag</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Set the ammo of the player</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">ammo the amount of bullets we want to set the bullets to</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setAmmo(</span><span class="s0">int </span><span class="s1">ammo){</span>
+        <span class="s1">mag = ammo</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Set the health of the player</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">h the amount we want to set the health to</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setHealth(</span><span class="s0">int </span><span class="s1">h){</span>
+        <span class="s1">health = h</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+
+
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

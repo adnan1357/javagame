@@ -1,0 +1,296 @@
+<html>
+<head>
+<title>Zombie.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #629755; font-style: italic;}
+.s3 { color: #629755; font-weight: bold; font-style: italic;}
+.s4 { color: #6897bb;}
+.s5 { color: #6a8759;}
+.s6 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Zombie.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">game</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">city.cs.engine.*</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">city.cs.engine.Shape</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">org.jbox2d.common.Vec2</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">javax.sound.sampled.LineUnavailableException</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">javax.sound.sampled.UnsupportedAudioFileException</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">javax.swing.*</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.ActionEvent</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.awt.event.ActionListener</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">java.io.IOException</span><span class="s0">;</span>
+
+<span class="s2">/**</span>
+ <span class="s2">* A zombie.</span>
+ <span class="s2">*</span>
+ <span class="s2">* A zombie object contains the parameters and functionality of the zombie</span>
+ <span class="s2">*</span>
+ <span class="s2">* </span><span class="s3">@author </span><span class="s2">adnanhabib</span>
+ <span class="s2">* </span><span class="s3">@version </span><span class="s2">1.0.0 May 7th, 2022</span>
+ <span class="s2">*/</span>
+
+<span class="s0">public class </span><span class="s1">Zombie </span><span class="s0">extends </span><span class="s1">DynamicBody </span><span class="s0">implements </span><span class="s1">ActionListener {</span>
+    <span class="s0">private static final </span><span class="s1">Shape bodyShape = </span><span class="s0">new </span><span class="s1">CircleShape(</span><span class="s4">1f</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private static </span><span class="s1">BodyImage walkgif = </span><span class="s0">new </span><span class="s1">BodyImage(</span><span class="s5">&quot;data/zombiewalk.gif&quot;</span><span class="s0">, </span><span class="s4">4</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private static </span><span class="s1">BodyImage attackgif = </span><span class="s0">new </span><span class="s1">BodyImage(</span><span class="s5">&quot;data/zombieattack.gif&quot;</span><span class="s0">, </span><span class="s4">5</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">health</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">baseHealth</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">damage</span><span class="s0">;</span>
+    <span class="s0">private boolean </span><span class="s1">alive</span><span class="s0">;</span>
+    <span class="s0">private int </span><span class="s1">speed</span><span class="s0">;</span>
+    <span class="s1">AttachedImage img</span><span class="s0">;</span>
+    <span class="s0">private </span><span class="s1">Timer timer</span><span class="s0">;</span>
+    <span class="s0">private </span><span class="s1">String name</span><span class="s0">;</span>
+    <span class="s0">private static </span><span class="s1">SoundClip attacksfx</span><span class="s0">;</span>
+
+    <span class="s6">//zombie attack sound effect</span>
+    <span class="s0">static </span><span class="s1">{</span>
+        <span class="s0">try </span><span class="s1">{</span>
+            <span class="s1">attacksfx = </span><span class="s0">new </span><span class="s1">SoundClip(</span><span class="s5">&quot;data/zombieattack.wav&quot;</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">} </span><span class="s0">catch </span><span class="s1">(UnsupportedAudioFileException e) {</span>
+            <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+        <span class="s1">} </span><span class="s0">catch </span><span class="s1">(IOException e) {</span>
+            <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+        <span class="s1">} </span><span class="s0">catch </span><span class="s1">(LineUnavailableException e) {</span>
+            <span class="s1">e.printStackTrace()</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Default zombie constructor</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">world the world the zombie is placed in</span>
+     <span class="s2">*/</span>
+    <span class="s0">public </span><span class="s1">Zombie(World world){</span>
+        <span class="s0">super</span><span class="s1">(world</span><span class="s0">, </span><span class="s1">bodyShape)</span><span class="s0">;</span>
+        <span class="s1">addImage(walkgif)</span><span class="s0">;</span>
+        <span class="s0">this</span><span class="s1">.alive = </span><span class="s0">true;</span>
+        <span class="s1">baseHealth = health</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">*Calculate the angle between the player and a position</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">v the position we want to calculate the angle from the player to</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">getAngle(Vec2 v){</span>
+        <span class="s1">Vec2 p = </span><span class="s0">this</span><span class="s1">.getPosition()</span><span class="s0">;</span>
+        <span class="s1">Vec2 con = </span><span class="s0">new </span><span class="s1">Vec2(p.x</span><span class="s0">, </span><span class="s1">p.y+</span><span class="s4">5</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">Vec2 m = v</span><span class="s0">;</span>
+
+        <span class="s0">float </span><span class="s1">a  = getDistance(m</span><span class="s0">,</span><span class="s1">p)</span><span class="s0">; </span><span class="s6">//distance between mouse and player</span>
+        <span class="s0">float </span><span class="s1">b = getDistance(p</span><span class="s0">,</span><span class="s1">con)</span><span class="s0">; </span><span class="s6">//distance between player and control</span>
+        <span class="s0">float </span><span class="s1">c = getDistance(m</span><span class="s0">,</span><span class="s1">con)</span><span class="s0">; </span><span class="s6">//distance between mouse and top of the screen</span>
+        <span class="s0">double </span><span class="s1">x = (a*a + b*b - c*c)</span><span class="s0">; </span><span class="s6">//numerator of cosine rule</span>
+        <span class="s0">double </span><span class="s1">y = (</span><span class="s4">2.0 </span><span class="s1">* a * b)</span><span class="s0">; </span><span class="s6">//denominator of cosine rull</span>
+        <span class="s0">double </span><span class="s1">d = x/y</span><span class="s0">; </span><span class="s6">//cosine rule</span>
+        <span class="s6">//convert angle to degrees</span>
+        <span class="s0">double </span><span class="s1">A = Math.toDegrees(Math.acos(d))</span><span class="s0">;</span>
+        <span class="s0">if </span><span class="s1">(m.x-p.x &gt; </span><span class="s4">0</span><span class="s1">){</span>
+            <span class="s1">A = -A</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s6">//if A is a valid number, rotate zombie</span>
+        <span class="s0">if </span><span class="s1">(!Float.isNaN((</span><span class="s0">float</span><span class="s1">) A)){</span>
+            <span class="s0">this</span><span class="s1">.rotateDegrees(</span><span class="s0">this</span><span class="s1">.getAngleDegrees()*-</span><span class="s4">1</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s0">this</span><span class="s1">.rotateDegrees((</span><span class="s0">float</span><span class="s1">) A)</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the distance between 2 vector positions</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">x first vector position</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">y second vector position</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the distance as a float</span>
+     <span class="s2">*/</span>
+    <span class="s0">private float </span><span class="s1">getDistance(Vec2 x</span><span class="s0">, </span><span class="s1">Vec2 y){</span>
+        <span class="s1">var a = x.x - y.x</span><span class="s0">;</span>
+        <span class="s1">var b = x.y - y.y</span><span class="s0">;</span>
+        <span class="s0">float </span><span class="s1">c  = (</span><span class="s0">float</span><span class="s1">) Math.sqrt( a*a + b*b )</span><span class="s0">;</span>
+        <span class="s0">return </span><span class="s1">c</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method which gets position of the barrel of the gun, so the bullet can be shot from the correct distance</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">centre the position of the player</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">r the radius where we want the tracker to be from the centre</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">angle the angle of the tracker from the centre</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the position of the tracker</span>
+     <span class="s2">*/</span>
+    <span class="s0">public </span><span class="s1">Vec2 getTrackerPos(Vec2 centre</span><span class="s0">, float </span><span class="s1">r</span><span class="s0">, double </span><span class="s1">angle){</span>
+        <span class="s6">//make angle a positive number &lt;= 18-</span>
+        <span class="s0">if </span><span class="s1">(angle &lt; -</span><span class="s4">1</span><span class="s1">){</span>
+            <span class="s1">angle = angle*-</span><span class="s4">1</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s0">else if</span><span class="s1">(angle == </span><span class="s4">180</span><span class="s1">){</span>
+        <span class="s1">}</span>
+        <span class="s0">else</span><span class="s1">{</span>
+            <span class="s1">angle = </span><span class="s4">360 </span><span class="s1">- angle</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s1">angle = angle * (Math.PI/</span><span class="s4">180</span><span class="s1">)</span><span class="s0">;</span>
+
+        <span class="s6">//get position of tracker x and y coordinates</span>
+        <span class="s0">float </span><span class="s1">x = (</span><span class="s0">float</span><span class="s1">) (centre.x + (r * Math.sin(angle)))</span><span class="s0">;</span>
+        <span class="s0">float </span><span class="s1">y = (</span><span class="s0">float</span><span class="s1">) (centre.y + (r * Math.cos(angle)))</span><span class="s0">;</span>
+        <span class="s0">return new </span><span class="s1">Vec2(x</span><span class="s0">,</span><span class="s1">y)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Get the health of the player</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">health</span>
+     <span class="s2">*/</span>
+    <span class="s0">public float </span><span class="s1">getHealth(){</span>
+        <span class="s0">return </span><span class="s1">health</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Set the health of the player</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">x the amount we want to set the health to</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setHealth(</span><span class="s0">int </span><span class="s1">x){</span>
+        <span class="s0">this</span><span class="s1">.health = x</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* destroy the zombie</span>
+     <span class="s2">*/</span>
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">destroy(){</span>
+        <span class="s0">this</span><span class="s1">.alive = </span><span class="s0">false;</span>
+        <span class="s0">super</span><span class="s1">.destroy()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* checks if the zombie is alive</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">true if zombie is alive</span>
+     <span class="s2">*/</span>
+    <span class="s0">public boolean </span><span class="s1">isAlive(){</span>
+        <span class="s0">return </span><span class="s1">alive</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method which removes all animation and plays the attack animation</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">attack(){</span>
+        <span class="s0">this</span><span class="s1">.removeAllImages()</span><span class="s0">;</span>
+        <span class="s6">//add attack animation gif</span>
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">attackgif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">, new </span><span class="s1">Vec2(</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s1">))</span><span class="s0">;</span>
+        <span class="s1">timer = </span><span class="s0">new </span><span class="s1">Timer(</span><span class="s4">400</span><span class="s0">, this</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">timer.start()</span><span class="s0">;</span>
+        <span class="s1">attacksfx.play()</span><span class="s0">;</span>
+
+
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method which makes zombie idle</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">idle(){</span>
+        <span class="s0">this</span><span class="s1">.removeAllImages()</span><span class="s0">;</span>
+
+        <span class="s1">img = </span><span class="s0">new </span><span class="s1">AttachedImage(</span><span class="s0">this, </span><span class="s1">walkgif</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">, new </span><span class="s1">Vec2(</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s1">))</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method to make the zombie idle</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">e</span>
+     <span class="s2">*/</span>
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">actionPerformed(ActionEvent e) {</span>
+        <span class="s1">idle()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method to set the walk animation</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">image</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setWalk(BodyImage image){</span>
+        <span class="s1">walkgif = image</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method to set the attack animation</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">image</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setAttack(BodyImage image){</span>
+        <span class="s1">attackgif = image</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* method to set the damage of the zombie</span>
+     <span class="s2">*</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">damage the number we want the damage to be</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setDamage(</span><span class="s0">int </span><span class="s1">damage){</span>
+        <span class="s0">this</span><span class="s1">.damage = damage</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* Check the damage</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the damage</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getDamage(){</span>
+        <span class="s0">return </span><span class="s1">damage</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the base health</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the basehealth</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getBaseHealth(){</span>
+        <span class="s0">return </span><span class="s1">baseHealth</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* set the basehealth</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">health the number we want the base health to be</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setBaseHealth(</span><span class="s0">int </span><span class="s1">health){</span>
+        <span class="s1">baseHealth = health</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* set the speed of the zombie</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">speed</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setSpeed(</span><span class="s0">int </span><span class="s1">speed) {</span>
+        <span class="s0">this</span><span class="s1">.speed = speed</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the speed of zombie</span>
+     <span class="s2">* </span><span class="s3">@return</span>
+     <span class="s2">*/</span>
+    <span class="s0">public int </span><span class="s1">getSpeed() {</span>
+        <span class="s0">return </span><span class="s1">speed</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* set the name of the zombie</span>
+     <span class="s2">* </span><span class="s3">@param </span><span class="s2">name</span>
+     <span class="s2">*/</span>
+    <span class="s0">public void </span><span class="s1">setName(String name){</span>
+        <span class="s0">this</span><span class="s1">.name = name</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">/**</span>
+     <span class="s2">* get the name of the zombie</span>
+     <span class="s2">* </span><span class="s3">@return </span><span class="s2">the zombie</span>
+     <span class="s2">*/</span>
+    <span class="s0">public </span><span class="s1">String getName(){</span>
+        <span class="s0">return </span><span class="s1">name</span><span class="s0">;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>
